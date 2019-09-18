@@ -15,7 +15,7 @@ class Listen(Thread):
     def __innit__(self,ip,port,buffer):
         Thread.innit(self)
         self.ip = ip
-        self.pot = port
+        self.port = port
         self.buffer = buffer
         print ('New connection from ', ip)
 
