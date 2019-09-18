@@ -1,12 +1,14 @@
 import socket
 from threading import Thread
 
-ip = socket.gethostname()
+ip = '192.168.1.140' #socket.gethostname()
 port = 9898
 buffer = 2048
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+print('debug 1')
 client.connect((ip,port))
+print('debug 2')
 
 class Listen(Thread):
 
