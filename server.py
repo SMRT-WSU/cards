@@ -59,7 +59,7 @@ class Client(Thread):
                 client.send(bytes('/quit', 'utf8'))
                 client.close()
                 del clients[client]
-                Client.broadcast(bytes('%s has left the chat.' % name, 'utf8'))
+                Client.broadcast(bytes('00%s has left the chat.' % name, 'utf8'))
                 break
 
     def accept_incoming_connections():
