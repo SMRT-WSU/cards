@@ -3,7 +3,9 @@ from threading import Thread
 
 clients = set()
 #Add a feature that imports the dict from a file, make it do ports to so you can have multiple running on one computer
-ips={}
+filee = open('ips.txt','r')
+ips = eval(filee.read())
+
 
 def ipDecode():
     ips
@@ -12,7 +14,7 @@ def broadcast(clients,data):
     for c in clients:
         print(c)
         c.send(data)
-        print('hey')
+        #print('hey')
 
 class Client(Thread):
 
@@ -26,8 +28,9 @@ class Client(Thread):
     def run(self):
         while True:
             data = conn.recv(buffer)
-
+            
             if ip in ips:
+                print(ip+data.decode('utf-8'))
                 pass
             else:
                 ips[ip] = data.decode('utf-8')
@@ -41,13 +44,14 @@ class Client(Thread):
             broadcast(clients, fullmessage)
             #message = input('Enter message: ')
             #if message == 'exit':
-                #break
+            #    break
             #conn.send(message.encode())
             
 
 tcp_ip = '0.0.0.0'
 tcp_port = 9898
 buffer = 1024
+newthread={}
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((tcp_ip,tcp_port))
@@ -56,5 +60,5 @@ while True:
     server.listen(9)
     (conn, (ip,port)) = server.accept()
     clients.add(conn)
-    newthread = Client(None,ip,port,buffer)
-    newthread.start()
+    newthread[ip] = Client(None,ip,port,buffer)
+    newthread[ip].start()
