@@ -67,7 +67,7 @@ class Client(Thread):
             client, client_address = server.accept()
             print('%s:%s has connected.' % client_address)
             client.send(bytes('00Welcome to this super epic chat room by me. '+
-                              'Now type your name and press enter!', 'utf8'))
+                              'Type your name and press enter in the box provided below', 'utf8'))
             address[client] = client_address
             Thread(target=Client.handle_client, args=(client,)).start()        
 
