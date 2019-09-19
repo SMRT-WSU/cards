@@ -38,7 +38,7 @@ def receive():
             font = colour(data[0:2])
             splitdata = data.split(':')
             if len(splitdata) == 2:
-                user = 'tag.first'+splitdata[0][2:]+':tag.last'
+                user = splitdata[0][2:]+': '
                 message = splitdata[1]+'\n'
             else: # System message
                 user = data[2:]
@@ -98,7 +98,7 @@ send_button.pack()
 
 canvas.protocol('WM_DELETE_WINDOW', on_closing)
 
-host = '192.168.1.179'#input('Enter host: ')
+host = '192.168.1.140'#input('Enter host: ')
 port = 9898#int(input('Enter port: '))
 
 
