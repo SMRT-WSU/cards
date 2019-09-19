@@ -12,9 +12,9 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((tcp_ip,tcp_port))
 
 #Add a feature that imports the dict from a file, make it do ports to so you can have multiple running on one computer
-filee = open('ips.txt','r')
-ips = eval(filee.read())
-filee.close()
+#filee = open('ips.txt','r')
+#ips = eval(filee.read())
+#filee.close()
 
 class Client(Thread):
 
@@ -45,10 +45,10 @@ class Client(Thread):
     def handle_client(client):
         '''Handles a clients dat are already connection'''
         name = client.recv(buffer).decode('utf8')
-        welcome = '00 \nWelcome %s! If you ever want to quit (which you never will), type /quit to exit.' % name
+        welcome = '00 \nWelcome %s! If you ever want to quit (which you never will), type /quit to exit \n' % name
         client.send(bytes(welcome, 'utf8'))
-        msg = '00%s has joined the chat!' % name
-        Client.broadcast(bytes(msg, 'utf8'))
+        mssg = '00%s has joined the chat!' % name
+        Client.broadcast(bytes(mssg, 'utf8'))
         clients[client] = name
         colour = Client.handle_colour()
         while True:
@@ -59,7 +59,7 @@ class Client(Thread):
                 client.send(bytes('/quit', 'utf8'))
                 client.close()
                 del clients[client]
-                Client.broadcast(bytes('%s has left the chat.' % name, 'utf8'))
+                Client.broadcast(bytes('00%s has left the chat.' % name, 'utf8'))
                 break
 
     def accept_incoming_connections():
