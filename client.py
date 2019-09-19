@@ -49,15 +49,14 @@ def receive():
 
             line = int(message_list.index('end-1c').split('.')[0])
             print(line)
-            message_list.tag_config('user', foreground=font)
+            message_list.tag_config(font, foreground=font)
             message_list.insert(tkinter.END, user)
             if font == 'gray':
-                message_list.tag_add('user', str(line+.0), str(line)+'.'+str(len(user)))
+                message_list.tag_add(font, str(line+.0), str(line)+'.'+str(len(user)))
             else:
-                message_list.tag_add('user', str(line+.0), str(line)+'.'+str(len(user)))
+                message_list.tag_add(font, str(line+.0), str(line)+'.'+str(len(user)))
             try:
                 message_list.insert(tkinter.END, message)
-                message_list.config(state=DISABLED)
             except: # Should check what kind of error i expect (to improve this)
                 pass
         except OSError:  # Don't know why, but if this aint here, it sometimes breaks
