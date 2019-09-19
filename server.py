@@ -2,6 +2,7 @@ import socket
 from threading import Thread
 from random import randint
 from ast import literal_eval
+import tkinter
 
 clients = {}
 address = {}
@@ -11,11 +12,6 @@ buffer = 1024
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((tcp_ip,tcp_port))
 
-#Add a feature that imports the dict from a file, make it do ports to so you can have multiple running on one computer
-#filee = open('ips.txt','r')
-#ips = eval(filee.read())
-#filee.close()
-
 class Client(Thread):
 
     def __innit__(self,ip,port,buffer):
@@ -23,12 +19,44 @@ class Client(Thread):
         self.ip = ip
         self.port = port
         self.buffer = buffer
+        self.colour = ''
         print ('New connection from ', ip)
 
+    def command(msg, client, originalcolour):
+        message = msg.decode('utf8')
+        message = message.split(' ')
+        print(message)
+
+        if message[0][1:] == 'help':
+            f = open('help.txt')
+            readme = f.read()
+            f.close()
+            client.send(bytes('99'+readme+'\n', 'utf-8'))
+
+        if message[0][1:] == 'colour':
+            try:
+                print('try')
+                arg1=int(message[1])
+                print(type(arg1))
+                if 1 <= arg1 <= 20:
+                    colour = message[1]
+                    print('debug2'+colour)
+                    if len(colour) != 2:
+                        colour = '0'+colour
+                        print('debug3'+colour)
+                        client.send(bytes(colour+'Colour successfully changed\n', 'utf-8'))
+                        return colour
+                    else:
+                        print('debug4'+colour)
+                        client.send(bytes(colour+'Colour successfully changed\n', 'utf-8'))
+                        return colour
+            except:
+                pass
+            
+        return originalcolour
+                
+
     def handle_colour():
-        #colourss = open('colours.txt','r')
-        #colours = literal_eval(colourss.read())
-        #colourss.close()
         colours=['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20']
         random = randint(0,19)
         colour = colours[random]
@@ -53,30 +81,33 @@ class Client(Thread):
     def handle_client(client):
         '''Handles a clients dat are already connection'''
         name = client.recv(buffer).decode('utf8')
-        welcome = '00 \nWelcome %s! If you ever want to quit (which you never will), type /quit to exit \n' % name
+        welcome = '00Welcome %s! Type /help to view the commands \n' % name
         client.send(bytes(welcome, 'utf8'))
-        mssg = '00%s has joined the chat!' % name
+        mssg = '00%s has joined the chat!\n' % name
         Client.broadcast(bytes(mssg, 'utf8'))
         clients[client] = name
         colour = Client.handle_colour()
         while True:
             msg = client.recv(buffer)
-            if msg != bytes('/quit', 'utf8'):
+            if msg[0] != 47:
+                print(colour)
                 Client.broadcast(msg, colour, name+': ')
             else:
                 #Commented out the next line because I think it is handled by the client
                 #client.send(bytes('/quit', 'utf8'))
-                client.close()
+                colour = Client.command(msg, client, colour)
+                
+                '''client.close()
                 del clients[client]
-                Client.broadcast(bytes('00%s has left the chat.' % name, 'utf8'))
-                break
+                Client.broadcast(bytes('00%s has left the chat.' % name, 'utf8'))'''
+                
 
     def accept_incoming_connections():
         while True:
             client, client_address = server.accept()
             print('%s:%s has connected.' % client_address)
             client.send(bytes('00Welcome to this super epic chat room by me. '+
-                              'Type your name and press enter in the box provided below', 'utf8'))
+                              'Type your name and press enter in the box provided below\n', 'utf8'))
             address[client] = client_address
             Thread(target=Client.handle_client, args=(client,)).start()        
 
@@ -84,6 +115,7 @@ class Client(Thread):
 if __name__ == '__main__':
     server.listen(4)  # Listening for up to 4 connections
     print('Waiting for connection...')
+    #screen = Monitor.run()
     ACCEPT_THREAD = Thread(target=Client.accept_incoming_connections)
     ACCEPT_THREAD.start()
     ACCEPT_THREAD.join()
