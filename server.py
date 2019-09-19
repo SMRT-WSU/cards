@@ -39,8 +39,16 @@ class Client(Thread):
     def broadcast(msg, colour='', prefix=''):
         '''Broadcasts a message to all the clients dat are connected'''
         prefix = colour+prefix
+        clientstopop=[]
         for sock in clients:
-            sock.send(bytes(prefix, 'utf8')+msg)
+            try:
+                sock.send(bytes(prefix, 'utf8')+msg)
+            except ConnectionResetError:
+                clientstopop.append(sock)
+                pass
+
+        for i in clientstopop:
+            clients.pop(sock)
 
     def handle_client(client):
         '''Handles a clients dat are already connection'''
@@ -56,7 +64,8 @@ class Client(Thread):
             if msg != bytes('/quit', 'utf8'):
                 Client.broadcast(msg, colour, name+': ')
             else:
-                client.send(bytes('/quit', 'utf8'))
+                #Commented out the next line because I think it is handled by the client
+                #client.send(bytes('/quit', 'utf8'))
                 client.close()
                 del clients[client]
                 Client.broadcast(bytes('00%s has left the chat.' % name, 'utf8'))
