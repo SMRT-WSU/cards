@@ -3,6 +3,7 @@ from threading import Thread
 from random import randint
 from ast import literal_eval
 import tkinter
+import sqlite3
 
 clients = {}
 address = {}
@@ -22,8 +23,8 @@ class Client(Thread):
         self.colour = ''
         print ('New connection from ', ip)
 
-    def command(msg, client, originalcolour):
-        message = msg.decode('utf8')
+    def command(msg, client, originalcolour, auth):
+        message = msg.decode('utf8')    
         message = message.split(' ')
         print(message)
 
@@ -33,6 +34,33 @@ class Client(Thread):
             f.close()
             client.send(bytes('99'+readme+'\n', 'utf-8'))
 
+        if message[0][1:] == 'broadcast':
+            if auth == True:
+                for sock in clients:
+                    try:
+                        sock.send(bytes('99!!'+','.join(message[1:]), 'utf8'))
+                    except ConnectionResetError:
+                        clientstopop.append(sock)
+                        pass
+            
+        if message[0][1:] == 'sudo':
+            try:
+                password = message[1]
+                dbconn = sqlite3.connect('sudo.db')
+                c = dbconn.cursor()
+                c.execute("SELECT * FROM sudo")
+                correctpasswords = c.fetchall()
+                print(correctpasswords)
+                dbconn.close()
+                for password in correctpasswords:
+                    #the passwords should be stored hashed at some point
+                    pass
+                if password in correctpasswords:
+                    auth = True
+                print (auth)
+            except IndexError:
+                client.send(bytes('99Correct usage is /sudo [password]', 'utf-8'))
+            
         if message[0][1:] == 'colour':
             try:
                 print('try')
@@ -53,7 +81,7 @@ class Client(Thread):
             except:
                 pass
             
-        return originalcolour
+        return originalcolour, auth
                 
 
     def handle_colour():
@@ -82,6 +110,7 @@ class Client(Thread):
         '''Handles a clients dat are already connection'''
         name = client.recv(buffer).decode('utf8')
         welcome = '00Welcome %s! Type /help to view the commands \n' % name
+        auth = False
         client.send(bytes(welcome, 'utf8'))
         mssg = '00%s has joined the chat!\n' % name
         Client.broadcast(bytes(mssg, 'utf8'))
@@ -95,7 +124,7 @@ class Client(Thread):
             else:
                 #Commented out the next line because I think it is handled by the client
                 #client.send(bytes('/quit', 'utf8'))
-                colour = Client.command(msg, client, colour)
+                colour, auth = Client.command(msg, client, colour, auth)
                 
                 '''client.close()
                 del clients[client]
@@ -120,3 +149,4 @@ if __name__ == '__main__':
     ACCEPT_THREAD.start()
     ACCEPT_THREAD.join()
     server.close()
+`
