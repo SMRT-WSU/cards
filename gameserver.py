@@ -35,6 +35,7 @@ class Client(Thread):
         '''Handles a clients dat are already connection'''
         name = client.recv(buffer).decode('utf8')
         clients[client] = name
+        print(clients)
         if len(clients) < 4:
             client.send(bytes('waiting4players','utf8'))
         else:
@@ -43,13 +44,14 @@ class Client(Thread):
             msg = client.recv(buffer)
             if msg != bytes('/quit', 'utf8'):
                 pass
-            else: client.close()
-            del clients[client]
-            Client.broadcast(bytes('leftgame','utf8'))
-            break
+            else:
+                client.close()
+                del clients[client]
+                Client.broadcast(bytes('leftgame','utf8'))
+                break
 
     def accept_incoming_connections():
-        while True:
+        while len(clients)<3:
             client, client_address = server.accept()
             print('%s:%s has connected.' % client_address)
             client.send(bytes('What is your player name?','utf8'))

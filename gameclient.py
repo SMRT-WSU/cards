@@ -9,6 +9,8 @@ def receive():
         print(data)
         if data == 'What is your player name?':
             send()
+        elif data == '4players':
+            pass #start game
 
 def send(event=None):  # event is passed by binders.
     '''Handles sending of messages.'''
@@ -21,9 +23,10 @@ def on_closing(event=None):
     my_message.set('/quit')
     send()
 
-host = ' 192.168.0.126'#input('Enter host: ')
+host = '192.168.0.126'#input('Enter host: ')
 port = 9899#int(input('Enter port: '))
 
+hand = []
 
 buffer = 2048
 address = (host, port)
