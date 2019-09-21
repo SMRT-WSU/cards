@@ -23,7 +23,7 @@ class Client(Thread):
         self.colour = ''
         print ('New connection from ', ip)
 
-    def command(msg, client, originalcolour, auth):
+    def command(msg, client, colour, auth):
         message = msg.decode('utf8')    
         message = message.split(' ')
         print(message)
@@ -73,15 +73,13 @@ class Client(Thread):
                         colour = '0'+colour
                         print('debug3'+colour)
                         client.send(bytes(colour+'Colour successfully changed\n', 'utf-8'))
-                        return colour
                     else:
                         print('debug4'+colour)
                         client.send(bytes(colour+'Colour successfully changed\n', 'utf-8'))
-                        return colour
             except:
                 pass
             
-        return originalcolour, auth
+        return (colour, auth)
                 
 
     def handle_colour():
@@ -124,7 +122,9 @@ class Client(Thread):
             else:
                 #Commented out the next line because I think it is handled by the client
                 #client.send(bytes('/quit', 'utf8'))
-                colour, auth = Client.command(msg, client, colour, auth)
+                returned = Client.command(msg, client, colour, auth)
+                colour = returned[0]
+                auth = returned[1]
                 
                 '''client.close()
                 del clients[client]
@@ -149,4 +149,4 @@ if __name__ == '__main__':
     ACCEPT_THREAD.start()
     ACCEPT_THREAD.join()
     server.close()
-`
+
