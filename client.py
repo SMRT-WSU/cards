@@ -61,6 +61,7 @@ def receive():
                 message_list.config(state='disabled')
             except: # Should check what kind of error i expect (to improve this)
                 pass
+            message_list.see('end')
         except OSError:  # Don't know why, but if this aint here, it sometimes breaks
             break
 
@@ -92,6 +93,7 @@ def send(event=None):  # event is passed by binders.
                  message_list.config(state='disabled')
              except: # Should check what kind of error i expect (to improve this)
                  pass
+             message_list.see('end')
              
     if message == '/quit':
         socket.close()
