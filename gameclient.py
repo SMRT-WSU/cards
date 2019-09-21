@@ -6,11 +6,16 @@ def receive():
     while True:
         #data is what the server sends
         data = socket.recv(buffer).decode('utf-8')
+        data = data.split(',')
         print(data)
-        if data == 'What is your player name?':
+        if data[1] == 'askinput':
+            print(data[0])
             send()
-        elif data == '4players':
-            pass #start game
+        elif data[1] == 'event':
+            if data[0] == 'waiting4players':
+                print('Waiting...') #Waiting screen
+            elif data[0] == '4players':
+                print('Game start!') #Start game
 
 def send(event=None):  # event is passed by binders.
     '''Handles sending of messages.'''

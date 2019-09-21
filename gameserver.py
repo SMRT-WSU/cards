@@ -1,8 +1,9 @@
 import socket
 import random
 from threading import Thread
+from collections import OrderedDict
 
-clients = {}
+clients = OrderedDict()
 address = {}
 tcp_ip = '0.0.0.0'
 tcp_port = 9899
@@ -21,12 +22,13 @@ class Client(Thread):
         self.buffer = buffer
         print ('New connection from ', ip)
 
-    def broadcast(msg):
+    def broadcast(msg,action):
         '''Broadcasts a message to all the clients dat are connected'''
         clientstopop = []
+        final = msg+','+action
         for sock in clients:
             try:
-                sock.send(bytes(msg,'utf8'))
+                sock.send(bytes(final,'utf8'))
             except ConnectionResetError:
                 clientstopop.append(sock)
                 pass
@@ -35,11 +37,14 @@ class Client(Thread):
         '''Handles a clients dat are already connection'''
         name = client.recv(buffer).decode('utf8')
         clients[client] = name
-        print(clients)
-        if len(clients) < 4:
-            client.send(bytes('waiting4players','utf8'))
-        else:
-            Client.broadcast('4players')
+        client.send(bytes('waiting4players,event','utf8'))
+        if len(clients) >= 4:
+            else:
+                for sock in clients:
+                    sock.send(bytes('PickOrder,askinput','utf8'))
+                    order = sock.recv(buffer).decode(utf8)
+                    break
+                Client.broadcast('4players','event')
         while True:
             msg = client.recv(buffer)
             if msg != bytes('/quit', 'utf8'):
@@ -47,14 +52,14 @@ class Client(Thread):
             else:
                 client.close()
                 del clients[client]
-                Client.broadcast(bytes('leftgame','utf8'))
+                Client.broadcast('leftgame','event')
                 break
 
     def accept_incoming_connections():
         while len(clients)<3:
             client, client_address = server.accept()
             print('%s:%s has connected.' % client_address)
-            client.send(bytes('What is your player name?','utf8'))
+            client.send(bytes('What is your player name?,askinput','utf8'))
             address[client] = client_address
             Thread(target=Client.handle_client, args=(client,)).start()
 
