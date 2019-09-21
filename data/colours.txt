@@ -1,0 +1,1 @@
+{'cyan':'01','deep sky blue':'02','indian red':'03','OliveDrab1':'04','SpringGreen2':'05','DarkOrange1':'06','HotPink3':'07','DarkOrchid3':'08','VioletRed2':'09','MediumPurple1':'10','SeaGreen2':'11','blue violet':'12','firebrick3':'13','cornflowerblue':'14','navajo white':'15','lawn green':'16','saddle brown':'17','coral':'18','forest green':'19','misty rose':'20'}
