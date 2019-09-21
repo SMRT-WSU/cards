@@ -1,3 +1,0 @@
-/help              |   View this message
-/quit              |   Quit your client and disconnect from the server
-/colour [details]  |   Enter the number colour you want to change to, or help for the colour list, or leave blank to view current colour
