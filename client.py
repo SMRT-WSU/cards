@@ -2,9 +2,12 @@ import tkinter
 import socket
 from threading import Thread
 from ast import literal_eval
+from win10toast import ToastNotifier
+import ctypes
 
 def colour(data):
     colours = {
+            '!!':'deep pink',
             '99':'',
             '00':'grey',
             '01':'cyan',
@@ -41,7 +44,7 @@ def receive():
             splitdata = data.split(':')
             if len(splitdata) >= 2:
                 user = splitdata[0][2:]+': '
-                message = ','.join(splitdata[1:])+'\n'
+                message = ':'.join(splitdata[1:])+'\n'
             else: # System message
                 user = data[2:]
                 message = ''
@@ -49,15 +52,21 @@ def receive():
                 message = splitdata[1]+'\n'
             except:
                 pass
-
+            fontsize = ('verdana')
             line = int(message_list.index('end-1c').split('.')[0])
             print(line)
             message_list.config(state='normal')
-            message_list.tag_config(font, foreground=font)
+            if data[0:2] == '!!':
+                toaster.show_toast('Notification from CAB', user, icon_path='icon.ico', duration=5, threaded=True)
+                fontsize = ('System', 30, 'bold')
+                ctypes.windll.user32.FlashWindow(ctypes.windll.kernel32.GetConsoleWindow(), True )
+            message_list.tag_config(font, foreground=font, font=fontsize)
             message_list.insert(tkinter.END, user)
             message_list.tag_add(font, str(line+.0), str(line)+'.'+str(len(user)))
             try:
+                message_list.tag_config(message, foreground=font, font=fontsize)
                 message_list.insert(tkinter.END, message)
+                message_list.tag_add(message, str(line) +'.'+str(len(user)), str(line)+'.'+str(len(user)+len(message)))
                 message_list.config(state='disabled')
             except: # Should check what kind of error i expect (to improve this)
                 pass
@@ -104,6 +113,8 @@ def on_closing(event=None):
     my_message.set('/quit')
     send()
 
+#Add functionality for pressing the up arrow to get last message
+toaster = ToastNotifier()
 canvas = tkinter.Tk()
 canvas.title('CAB')
 

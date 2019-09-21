@@ -3,7 +3,6 @@ from threading import Thread
 from random import randint
 from ast import literal_eval
 import tkinter
-import sqlite3
 
 clients = {}
 address = {}
@@ -38,28 +37,29 @@ class Client(Thread):
             if auth == True:
                 for sock in clients:
                     try:
-                        sock.send(bytes('99!!'+','.join(message[1:]), 'utf8'))
+                        sock.send(bytes('!!'+' '.join(message[1:])+'\n', 'utf8'))
                     except ConnectionResetError:
                         clientstopop.append(sock)
                         pass
+            else:
+                client.send(bytes('99You are not authorised to use this command\n', 'utf-8'))
             
         if message[0][1:] == 'sudo':
             try:
                 password = message[1]
-                dbconn = sqlite3.connect('sudo.db')
-                c = dbconn.cursor()
-                c.execute("SELECT * FROM sudo")
-                correctpasswords = c.fetchall()
+                f=open('sudo.txt')
+                correctpasswords = f.read()
+                f.close()
                 print(correctpasswords)
-                dbconn.close()
                 for password in correctpasswords:
                     #the passwords should be stored hashed at some point
                     pass
                 if password in correctpasswords:
                     auth = True
+                    client.send(bytes('99Authorised\n','utf-8'))
                 print (auth)
             except IndexError:
-                client.send(bytes('99Correct usage is /sudo [password]', 'utf-8'))
+                client.send(bytes('99Correct usage is /sudo [password]\n', 'utf-8'))
             
         if message[0][1:] == 'colour':
             try:
