@@ -11,3 +11,4 @@ The game should be able to run at the very least, a game of Bridge, communicatin
 
 ### Footnotes
 - Perhaps we want to try a simpler multiplayer game and get that to work before attempting bridge; we can always allow the final project to have multiple games anyway
+- Oliver is here for general moral support, to provide drinks and take credit at the end 
