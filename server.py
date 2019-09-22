@@ -8,9 +8,12 @@ clients = {}
 address = {}
 tcp_ip = '0.0.0.0'
 tcp_port = 9898
-buffer = 1024
+buffer = 4096
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((tcp_ip,tcp_port))
+
+class BadFormat(Exception):
+    pass
 
 class Client(Thread):
 
@@ -28,11 +31,37 @@ class Client(Thread):
         print(message)
 
         if message[0][1:] == 'help':
-            f = open('help.txt')
+            f = open('./data/help.txt')
             readme = f.read()
             f.close()
             client.send(bytes('99'+readme+'\n', 'utf-8'))
-
+        
+        if message[0][1:] == 'upload':
+            try:
+                if len(message) is not 3:   
+                    raise BadFormat
+                filename = client.recv(32).decode('utf-8')
+                filename = filename.replace(' ','')
+                print (filename)
+                client.send(bytes('99Your file is being uploaded, please wait','utf-8'))
+                a = False
+                data = bytearray()
+                while a is False:
+                    data.extend(client.recv(buffer))
+                    #print(data)
+                    #print(data[-4:])
+                    if data[-4:] == b'AA01':
+                        print('data ends in AA01')
+                        data = data[:-4]
+                        a = True
+                print('escaped loop')
+                f = open('./downloads/'+filename, 'wb')
+                f.write(data)
+                f.close
+                client.send(bytes('99File Uploaded: '+filename, 'utf-8'))
+            except BadFormat:
+                client.send(bytes('99Correct format is /upload [filepath] [filename]\n', 'utf-8'))
+            
         if message[0][1:] == 'broadcast':
             if auth == True:
                 for sock in clients:
@@ -47,7 +76,7 @@ class Client(Thread):
         if message[0][1:] == 'sudo':
             try:
                 password = message[1]
-                f=open('sudo.txt')
+                f=open('./data/sudo.txt')
                 correctpasswords = f.read()
                 f.close()
                 print(correctpasswords)
