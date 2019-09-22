@@ -7,7 +7,6 @@ def receive():
         #data is what the server sends
         data = socket.recv(buffer).decode('utf-8')
         data = data.split(',')
-        print(data)
         if data[1] == 'askinput':
             print(data[0])
             send()

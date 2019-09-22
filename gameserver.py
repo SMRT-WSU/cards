@@ -38,13 +38,11 @@ class Client(Thread):
         name = client.recv(buffer).decode('utf8')
         clients[client] = name
         client.send(bytes('waiting4players,event','utf8'))
-        if len(clients) >= 4:
-            else:
-                for sock in clients:
-                    sock.send(bytes('PickOrder,askinput','utf8'))
-                    order = sock.recv(buffer).decode(utf8)
-                    break
-                Client.broadcast('4players','event')
+        print(len(clients))
+        if len(clients) == 4:
+            client.send(bytes('PickOrder,askinput','utf8'))
+            order = client.recv(buffer).decode('utf8')
+            Client.broadcast('4players','event')
         while True:
             msg = client.recv(buffer)
             if msg != bytes('/quit', 'utf8'):
