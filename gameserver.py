@@ -42,6 +42,9 @@ class Client(Thread):
         if len(clients) == 4:
             client.send(bytes('PickOrder,askinput','utf8'))
             order = client.recv(buffer).decode('utf8')
+            #Order will be a list of two lists. These will be teams.
+            #The first player in the first list bids first, then the first in the second
+            #The player who decides the teams must be in the second team.
             Client.broadcast('4players','event')
         while True:
             msg = client.recv(buffer)
