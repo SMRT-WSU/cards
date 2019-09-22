@@ -4,6 +4,7 @@ from threading import Thread
 from ast import literal_eval
 from win10toast import ToastNotifier
 import ctypes
+import os
 
 def colour(data):
     colours = {
@@ -42,27 +43,35 @@ def receive():
             data = socket.recv(buffer).decode('utf-8')
             font = colour(data[0:2])
             splitdata = data.split(':')
+
             if len(splitdata) >= 2:
                 user = splitdata[0][2:]+': '
                 message = ':'.join(splitdata[1:])+'\n'
             else: # System message
                 user = data[2:]
                 message = ''
+
             try: #see if its a system message
                 message = splitdata[1]+'\n'
             except:
                 pass
+
             fontsize = ('verdana')
             line = int(message_list.index('end-1c').split('.')[0])
             print(line)
             message_list.config(state='normal')
+
             if data[0:2] == '!!':
-                toaster.show_toast('Notification from CAB', user, icon_path='icon.ico', duration=5, threaded=True)
+                toaster.show_toast('Notification from CAB', user, icon_path='./data/icon.ico', duration=5, threaded=True)
                 fontsize = ('System', 30, 'bold')
                 ctypes.windll.user32.FlashWindow(ctypes.windll.kernel32.GetConsoleWindow(), True )
+            if data[:2] == '99':
+                fontsize = ('Courier', 10)
+                
             message_list.tag_config(font, foreground=font, font=fontsize)
             message_list.insert(tkinter.END, user)
             message_list.tag_add(font, str(line+.0), str(line)+'.'+str(len(user)))
+
             try:
                 message_list.tag_config(message, foreground=font, font=fontsize)
                 message_list.insert(tkinter.END, message)
@@ -80,11 +89,75 @@ def send(event=None):  # event is passed by binders.
     message = my_message.get()
     my_message.set('')  # Clears input field.
     try:
-        socket.send(bytes(message, 'utf8'))
+        socket.send(bytes(message, 'utf-8'))
     except ConnectionResetError:
         pass
+
+    if message == '/pwd':
+        message = 'Your current directory is '+os.getcwd()+'\n'
+        lines = int(message_list.index('end-1c').split('.')[0])
+        print(lines)
+        fontsize = ('Courier', 10)
+        message_list.config(state='normal')
+        message_list.tag_config('hi', font=fontsize)
+        message_list.insert(tkinter.END, message)
+        message_list.tag_add('hi', str(lines+.0), str(lines)+'.'+str(len(message)))
+        message_list.config(state='disabled')
+        message_list.see('end')
+
+    hello = message.split(' ')
+    if hello[0] == '/upload':
+        print('hello')
+        
+        try:
+            filepath = hello[1]
+            f = open(filepath, 'rb')
+            data = f.read()
+            f.close()
+            print('opened')
+            padding = 32 - len(hello[2])
+            socket.send(bytes(hello[2]+padding*' ', 'utf-8'))
+            print('sent filename')
+            socket.send(data)
+            print('sent file data')
+            socket.send(bytes('AA01', 'utf-8'))
+        except FileNotFoundError:
+            message = 'File Not Found\n'
+            lines = int(message_list.index('end-1c').split('.')[0])
+            print(lines)
+            fontsize = ('Courier', 10)
+            user = len(message[2:])
+            message_list.config(state='normal')
+            message_list.tag_config('hi', font=fontsize)
+            message_list.insert(tkinter.END, user)
+            message_list.tag_add('hi', str(lines+.0), str(lines)+'.'+str(user))
+            try:
+                message_list.insert(tkinter.END, message)
+            except: # Should check what kind of error i expect (to improve this)
+                pass
+            message_list.config(state='disabled')
+            message_list.see('end')
+                       
+        except:
+            message = 'Failed to upload\n'
+            lines = int(message_list.index('end-1c').split('.')[0])
+            print(lines)
+            fontsize = ('Courier', 10)
+            user = len(message[2:])
+            message_list.config(state='normal')
+            message_list.tag_config('hi', font=fontsize)
+            message_list.insert(tkinter.END, user)
+            message_list.tag_add('hi', str(lines+.0), str(lines)+'.'+str(user))
+            try:
+                message_list.insert(tkinter.END, message)
+            except: # Should check what kind of error i expect (to improve this)
+                pass
+            message_list.config(state='disabled')
+            message_list.see('end')
+             
     if message == '/colour list':
-         f = open('colours.txt')
+         f = open('./data/colours.txt')
+
          data = literal_eval(f.read())
          f.close()
          for i in data:
@@ -128,9 +201,10 @@ message_list.pack(side=tkinter.LEFT, fill=tkinter.BOTH)
 message_list.pack()
 messages_frame.pack()
 
-entry_field = tkinter.Entry(canvas, textvariable=my_message)
+entry_field = tkinter.Entry(canvas, textvariable=my_message, width=100)
 entry_field.bind('<Return>', send)
 entry_field.pack()
+entry_field.focus()
 send_button = tkinter.Button(canvas, text='Send', command=send)
 send_button.pack()
 
