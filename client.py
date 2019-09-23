@@ -8,6 +8,7 @@ import os
 
 def colour(data):
     colours = {
+            'CO':'',
             '!!':'deep pink',
             '99':'',
             '00':'grey',
@@ -41,8 +42,12 @@ def receive():
     while True:
         try:
             data = socket.recv(buffer).decode('utf-8')
-            font = colour(data[0:2])
+            try:
+                font = colour(data[0:2])
+            except KeyError: #For super long terminal responses that exceed my buffer
+                data = 'CO'+data
             splitdata = data.split(':')
+            print(data)
 
             if len(splitdata) >= 2:
                 user = splitdata[0][2:]+': '
@@ -61,24 +66,25 @@ def receive():
             print(line)
             message_list.config(state='normal')
 
-            if data[0:2] == '!!':
-                toaster.show_toast('Notification from CAB', user, icon_path='./data/icon.ico', duration=5, threaded=True)
-                fontsize = ('System', 30, 'bold')
-                ctypes.windll.user32.FlashWindow(ctypes.windll.kernel32.GetConsoleWindow(), True )
-            if data[:2] == '99':
-                fontsize = ('Courier', 10)
-                
-            message_list.tag_config(font, foreground=font, font=fontsize)
-            message_list.insert(tkinter.END, user)
-            message_list.tag_add(font, str(line+.0), str(line)+'.'+str(len(user)))
-
-            try:
-                message_list.tag_config(message, foreground=font, font=fontsize)
-                message_list.insert(tkinter.END, message)
-                message_list.tag_add(message, str(line) +'.'+str(len(user)), str(line)+'.'+str(len(user)+len(message)))
-                message_list.config(state='disabled')
-            except: # Should check what kind of error i expect (to improve this)
-                pass
+            if data[:2] == 'CO':
+                message_list.insert(tkinter.END, data[2:])
+            else:
+                if data[:2] == '!!':
+                    toaster.show_toast('Notification from CAB', user, icon_path='./data/icon.ico', duration=5, threaded=True)
+                    fontsize = ('System', 30, 'bold')
+                    ctypes.windll.user32.FlashWindow(ctypes.windll.kernel32.GetConsoleWindow(), True )
+                if data[:2] == '99':
+                    fontsize = ('Courier', 10)
+                message_list.tag_config(font, foreground=font, font=fontsize)
+                message_list.insert(tkinter.END, user)
+                message_list.tag_add(font, str(line+.0), str(line)+'.'+str(len(user)))
+                try:
+                    message_list.tag_config(message, foreground=font, font=fontsize)
+                    message_list.insert(tkinter.END, message)
+                    message_list.tag_add(message, str(line) +'.'+str(len(user)), str(line)+'.'+str(len(user)+len(message)))
+                except: # Should check what kind of error i expect (to improve this)
+                    pass
+            message_list.config(state='disabled')
             message_list.see('end')
         except OSError:  # Don't know why, but if this aint here, it sometimes breaks
             break
@@ -110,13 +116,23 @@ def send(event=None):  # event is passed by binders.
         print('hello')
         
         try:
-            filepath = hello[1]
+            p=0
+            print('len'+str(len(hello)))
+            for i in range(len(hello)-1):
+                if hello[i] == '-n':
+                    name = ' '.join(hello[i+1:])
+                    print('name '+name)
+                    p = i
+                if hello[i] == '-p':
+                    filepath = ' '.join(hello[i+1:p-2])
+                    print('filepath '+filepath)
+                
             f = open(filepath, 'rb')
             data = f.read()
             f.close()
             print('opened')
-            padding = 32 - len(hello[2])
-            socket.send(bytes(hello[2]+padding*' ', 'utf-8'))
+            padding = 64 - len(name)
+            socket.send(bytes(name+padding*' ', 'utf-8'))
             print('sent filename')
             socket.send(data)
             print('sent file data')
@@ -133,12 +149,12 @@ def send(event=None):  # event is passed by binders.
             message_list.tag_add('hi', str(lines+.0), str(lines)+'.'+str(user))
             try:
                 message_list.insert(tkinter.END, message)
-            except: # Should check what kind of error i expect (to improve this)
+            except: # Should check what kind of error I expect (to improve this)
                 pass
             message_list.config(state='disabled')
             message_list.see('end')
                        
-        except:
+        '''except:
             message = 'Failed to upload\n'
             lines = int(message_list.index('end-1c').split('.')[0])
             print(lines)
@@ -153,7 +169,7 @@ def send(event=None):  # event is passed by binders.
             except: # Should check what kind of error i expect (to improve this)
                 pass
             message_list.config(state='disabled')
-            message_list.see('end')
+            message_list.see('end')'''
              
     if message == '/colour list':
          f = open('./data/colours.txt')
@@ -214,7 +230,7 @@ host = '192.168.1.179'#input('Enter host: ')
 port = 9898#int(input('Enter port: '))
 
 
-buffer = 2048
+buffer = 8192
 address = (host, port)
 
 socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
