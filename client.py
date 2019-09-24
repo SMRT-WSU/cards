@@ -37,6 +37,21 @@ def colour(data):
     colour = colours[data]
     return colour
 
+def messages(message, font, fontsize, foreground='', user=''):
+    lines = int(message_list.index('end-1c').split('.')[0])
+    print(lines)
+    user = len(message[2:])
+    message_list.config(state='normal')
+    message_list.tag_config(font, font=fontsize, foreground=foreground)
+    message_list.insert(tkinter.END, lines)
+    try:
+        message_list.tag_add(font, str(lines+.0), str(lines)+'.'+str(user))
+    except:
+        pass
+    message_list.insert(tkinter.END, message)
+    message_list.config(state='disabled')
+    message_list.see('end')
+
 def receive():
     '''Recives da message'''
     while True:
@@ -111,7 +126,25 @@ def send(event=None):  # event is passed by binders.
         message_list.config(state='disabled')
         message_list.see('end')
 
+
+    
     hello = message.split(' ')
+    if hello[0] == '/download':
+        a = False
+        data = bytearray()
+        while a is False:
+            data.extend(socket.recv(buffer))
+            print(data)
+            if data[-4:] == b'CC03':
+                print ('data ends in CC03')
+                data = data[:-4]
+                a = True
+        print ('escaped loop')
+        with open(hello[1],'wb') as f:
+            f.write(data)
+        fontsize = ('Courier',10)
+        messages('File downloaded', 'download', fontsize)
+        
     if hello[0] == '/upload':
         print('hello')
         
@@ -139,20 +172,8 @@ def send(event=None):  # event is passed by binders.
             socket.send(bytes('AA01', 'utf-8'))
         except FileNotFoundError:
             message = 'File Not Found\n'
-            lines = int(message_list.index('end-1c').split('.')[0])
-            print(lines)
-            fontsize = ('Courier', 10)
-            user = len(message[2:])
-            message_list.config(state='normal')
-            message_list.tag_config('hi', font=fontsize)
-            message_list.insert(tkinter.END, user)
-            message_list.tag_add('hi', str(lines+.0), str(lines)+'.'+str(user))
-            try:
-                message_list.insert(tkinter.END, message)
-            except: # Should check what kind of error I expect (to improve this)
-                pass
-            message_list.config(state='disabled')
-            message_list.see('end')
+            messages(message,'hi')
+            
                        
         '''except:
             message = 'Failed to upload\n'
@@ -178,11 +199,14 @@ def send(event=None):  # event is passed by binders.
          f.close()
          for i in data:
              message = ': '+data[i]+'\n'
+             user = i
              font = colour(data[i])
+             fontsize = ('Courier', 10)
+             messages(message,i,fontsize,font,user)
              lines = int(message_list.index('end-1c').split('.')[0])
              print(lines)
              message_list.config(state='normal')
-             user = i
+             
              message_list.tag_config(font, foreground=font)
              message_list.insert(tkinter.END, user)
              message_list.tag_add(font, str(lines+.0), str(lines)+'.'+str(len(user)))
@@ -226,7 +250,7 @@ send_button.pack()
 
 canvas.protocol('WM_DELETE_WINDOW', on_closing)
 
-host = '192.168.1.179'#input('Enter host: ')
+host = '127.0.0.1'#input('Enter host: ')
 port = 9898#int(input('Enter port: '))
 
 
