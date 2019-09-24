@@ -61,7 +61,7 @@ class Client(Thread):
 
         if message[0][1:] == 'ls':
             try:
-                ls = subprocess.check_output('powershell.exe ls ./downloads',shell=True,stderr=subprocess.STDOUT)
+                ls = subprocess.check_output('powershell.exe ls ./uploads',shell=True,stderr=subprocess.STDOUT)
                 print(str(client)+ls.decode('utf-8'))
                 client.send(bytes('CO','utf-8')+ls+bytes('\n','utf-8'))
             except subprocess.CalledProcessError as e:
@@ -96,7 +96,7 @@ class Client(Thread):
                         data = data[:-4]
                         a = True
                 print('escaped loop')
-                f = open('./downloads/'+filename, 'wb')
+                f = open('./uploads/'+filename, 'wb')
                 f.write(data)
                 f.close
                 client.send(bytes('99File Uploaded: '+filename+'\n', 'utf-8'))
@@ -113,6 +113,14 @@ class Client(Thread):
                         pass
             else:
                 client.send(bytes('99You are not authorised to use this command\n', 'utf-8'))
+
+        if message[0][1:] == 'download':
+            with open('./uploads/'+str(message[1]),'rb') as f:
+                data = f.read()
+                print(data)
+            
+            client.send(data)
+            client.send(bytes('CC03','utf-8'))
             
         if message[0][1:] == 'sudo':
             try:
