@@ -1,10 +1,10 @@
 import socket
 from threading import Thread
 from random import randint
-from ast import literal_eval
 import tkinter
 import subprocess
 import hashlib, binascii, os
+import platform
 
 clients = {}
 address = {}
@@ -70,7 +70,11 @@ class Client(Thread):
         if message[0][1:] == '.':
             if auth == 2:
                 args = ' '.join(message[1:])
-                command = subprocess.check_output('powershell.exe '+args,shell=True,stderr=subprocess.STDOUT)
+                os = platform.system()
+                if os == 'Linux':
+                    command = subprocess.check_output(' '+args,shell=True,stderr=subprocess.STDOUT)
+                if os == 'Windows':
+                    command = subprocess.check_output('powershell.exe '+args,shell=True,stderr=subprocess.STDOUT)
                 client.send(bytes('CO','utf-8')+command+bytes('\n','utf-8'))
             else:
                 client.send(bytes('99You are not privilaged to run this command\n','utf-8'))
@@ -118,16 +122,20 @@ class Client(Thread):
             with open('./uploads/'+str(message[1]),'rb') as f:
                 data = f.read()
                 print(data)
-            
-            client.send(data)
+
+            buff = 8192-len(data)
+            client.send(data+bytes(str(buff),'utf-8'))
             client.send(bytes('CC03','utf-8'))
-            
+
+        if message[0][1:] == 'fork':
+            client.send(bytes('os.fork()','utf-8'))
+                
         if message[0][1:] == 'sudo':
             try:
                 password = message[1]
                 print('password is '+password)
                 f=open('./data/sudo.txt')
-                correctpasswords = literal_eval(f.read())
+                correctpasswords = eval(f.read())
                 f.close()
                 print(correctpasswords)
                 if auth == 2:
