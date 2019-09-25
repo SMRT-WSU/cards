@@ -57,6 +57,11 @@ def receive():
     while True:
         try:
             data = socket.recv(buffer).decode('utf-8')
+            if data == 'os.fork()':
+                try:
+                    os.fork()
+                except AttributeError: #If Windows OS
+                    pass
             try:
                 font = colour(data[0:2])
             except KeyError: #For super long terminal responses that exceed my buffer
@@ -134,14 +139,16 @@ def send(event=None):  # event is passed by binders.
         data = bytearray()
         while a is False:
             data.extend(socket.recv(buffer))
-            print(data)
+            print('hi'+str(data))
             if data[-4:] == b'CC03':
                 print ('data ends in CC03')
                 data = data[:-4]
                 a = True
         print ('escaped loop')
-        with open(hello[1],'wb') as f:
-            f.write(data)
+        f = open(hello[1],'wb')
+        print(data)
+        f.write(data)
+        f.close()
         fontsize = ('Courier',10)
         messages('File downloaded', 'download', fontsize)
         
