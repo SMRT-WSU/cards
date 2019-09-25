@@ -23,7 +23,7 @@ for suit in suits:
         screen.blit(img, (0, 0))
         deck.append(card(str(i), suit, img))
     for value in values:
-        pygame.image.load('cards/' + value + suit + '.jpg')
+        img = pygame.image.load('cards/' + value + suit + '.jpg')
         deck.append(card(value, suit, img))
 
 random.shuffle(deck)
