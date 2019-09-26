@@ -5,8 +5,8 @@ pygame.init()
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 green = (0, 112, 0)
 
-suits = ('C', 'D', 'H', 'S')
-values = ('A', 'J', 'K', 'Q')
+suits = ('clubs', 'diamonds', 'hearts', 'spades')
+values = ('ace', 'jack', 'king', 'queen')
 deck = []
 hand = []
 
@@ -19,11 +19,11 @@ class card():
 
 for suit in suits:
     for i in range(2,10):
-        img = pygame.image.load('cards/' + str(i) + suit + '.jpg')
+        img = pygame.image.load('cards/' + str(i) +'_of_' + suit + '.png')
         screen.blit(img, (0, 0))
         deck.append(card(str(i), suit, img))
     for value in values:
-        img = pygame.image.load('cards/' + value + suit + '.jpg')
+        img = pygame.image.load('cards/' + value + '_of_' + suit + '.png')
         deck.append(card(value, suit, img))
 
 random.shuffle(deck)
