@@ -7,32 +7,10 @@ import ctypes
 import os
 
 def colour(data):
-    colours = {
-            'CO':'',
-            '!!':'deep pink',
-            '99':'',
-            '00':'grey',
-            '01':'cyan',
-            '02':'deep sky blue',
-            '03':'indian red',
-            '04':'OliveDrab1',
-            '05':'SpringGreen2',
-            '06':'HotPink3',
-            '07':'DarkOrange1',
-            '08':'DarkOrchid3',
-            '09':'VioletRed2',
-            '10':'MediumPurple1',
-            '11':'SeaGreen2',
-            '12':'blue violet',
-            '13':'firebrick3',
-            '14':'cornflowerblue',
-            '15':'navajo white',
-            '16':'lawn green',
-            '17':'saddle brown',
-            '18':'coral',
-            '19':'forest green',
-            '20':'misty rose'
-        }
+    f = open('./data/colours.txt')
+    filedata=f.read()
+    f.close()
+    colours = eval(filedata)
     print (data)
     colour = colours[data]
     return colour
